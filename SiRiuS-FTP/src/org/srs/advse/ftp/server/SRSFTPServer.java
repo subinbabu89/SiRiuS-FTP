@@ -1,4 +1,4 @@
-package org.srs.advse.ftp.client;
+package org.srs.advse.ftp.server;
 
 import java.nio.file.Path;
 import java.util.HashMap;
