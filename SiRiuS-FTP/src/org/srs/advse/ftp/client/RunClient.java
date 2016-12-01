@@ -28,7 +28,7 @@ public class RunClient {
 
 		nPort = Integer.parseInt(args[1]);
 		tPort = Integer.parseInt(args[2]);
-
+		
 		try {
 			SRSFTPClient client = new SRSFTPClient();
 			(new Thread(new ClientCommunicationHandler(client, hostname, nPort))).start();

@@ -1,5 +1,6 @@
 package org.srs.advse.ftp.client;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,4 +57,17 @@ public class SRSFTPClient {
 		return false;
 	}
 
+	public synchronized boolean terminateGET(Path path, Path serverPath, int commandID) {
+		try {
+			if (terminateSet.contains(commandID)) {
+				commandChannelMap.remove(commandID);
+				dataChannelSet.remove(serverPath);
+				terminateSet.remove(commandID);
+				Files.deleteIfExists(path);
+				return true;
+			}
+		} catch (Exception e) {}
+		
+		return false;
+	}
 }

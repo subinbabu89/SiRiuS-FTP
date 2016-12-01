@@ -55,6 +55,11 @@ public class ServerCommunicationHandler implements Runnable{
 			e.printStackTrace();
 		}
 	}
+	
+	public void pwd() throws Exception {
+		//send path
+		dataChannelOutputStream.writeBytes(path + "\n");
+	}
 
 
 
@@ -66,8 +71,6 @@ public class ServerCommunicationHandler implements Runnable{
 			try {
 				while (!commandCbuffer.ready())
 					Thread.sleep(10);
-				
-				System.out.println("on server received: "+commandCbuffer.readLine());
 				
 				input = new ArrayList<String>();
 				Scanner enteredInput = new Scanner(commandCbuffer.readLine());
@@ -83,6 +86,10 @@ public class ServerCommunicationHandler implements Runnable{
 				System.out.println("relevant input is : "+input.get(0));
 				
 				switch (input.get(0)) {
+				case "pwd":
+					pwd();
+					break;
+					
 				case "test":
 					System.out.println("printing test in server");
 					break;
@@ -90,12 +97,13 @@ public class ServerCommunicationHandler implements Runnable{
 					break finishThread;
 
 				default:
-					break;
+					System.out.println("invalid command");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}catch (Exception e) {
 			}
 		}
 	}

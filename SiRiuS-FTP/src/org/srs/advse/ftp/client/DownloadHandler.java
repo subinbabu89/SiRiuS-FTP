@@ -4,8 +4,11 @@
 package org.srs.advse.ftp.client;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -50,7 +53,57 @@ public class DownloadHandler implements Runnable {
 	}
 	
 	public void download() throws Exception{
-
+		if(!client.transfer(serverPath.resolve(inputs.get(1)))){
+			System.out.println("File already transfering");
+			return;
+		}
+		
+		dataOutputStream.writeBytes("get "+serverPath.resolve(inputs.get(1))+"\n");
+		
+		String line;
+		if(!(line = bufferedReader.readLine()).equals("")){
+			System.out.println(line);
+			return;
+		}
+		
+		try{
+			terminateID = Integer.parseInt(bufferedReader.readLine());
+		}catch (Exception e) {
+System.out.println("invalid terminate ID");
+		}
+		
+		client.transferIN(serverPath.resolve(inputs.get(1)),terminateID);
+		
+		if(client.terminateGET(path.resolve(inputs.get(1)),serverPath.resolve(inputs.get(1)),terminateID)){
+			return;
+		}
+		
+		byte[] filebuffer = new byte[8];
+		dataInputStream.read(filebuffer);
+		ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(filebuffer);
+		DataInputStream dis= new DataInputStream(arrayInputStream);
+		long fileSize = dis.readLong();
+		
+		if(client.terminateGET(path.resolve(inputs.get(1)),serverPath.resolve(inputs.get(1)),terminateID)){
+			return;
+		}
+		
+		FileOutputStream fileOutputStream = new FileOutputStream(new File(inputs.get(1)));
+		int count = 0;
+		byte[] buffer = new byte[8192];
+		long bytesReceived = 0;
+		while(bytesReceived < fileSize){
+			if(client.terminateGET(path.resolve(inputs.get(1)),serverPath.resolve(inputs.get(1)),terminateID)){
+				fileOutputStream.close();
+				return;
+			}
+			count = dataInputStream.read(buffer);
+			fileOutputStream.write(buffer, 0, count);
+			bytesReceived+=count;
+		}
+		fileOutputStream.close();
+		
+		client.transferOUT(serverPath.resolve(inputs.get(1)), terminateID);
 	}
 
 	/* (non-Javadoc)

@@ -28,7 +28,7 @@ public class ClientCommunicationHandler implements Runnable {
 	private String host;
 	private int port;
 	private List<String> input;
-	
+
 	private Socket socket;
 	private Path serverPath, userPath;
 
@@ -55,48 +55,75 @@ public class ClientCommunicationHandler implements Runnable {
 		dataOutputStream = socket.getOutputStream();
 		dataChannelOutputStream = new DataOutputStream(dataOutputStream);
 
+		dataChannelOutputStream.writeBytes("pwd" + "\n");
 		String line;
 		if (!(line = commandCbuffer.readLine()).equals("")) {
 			serverPath = Paths.get(line);
 		}
 
 		userPath = Paths.get(System.getProperty("user.dir"));
+		System.out.println("Connected to: " + hostAddress);
+	}
+	
+	public void pwd() throws Exception {
+		//only one argument
+		if (input.size() != 1) {
+			invalid();
+			return;
+		}
+		
+		//send command
+		dataChannelOutputStream.writeBytes("pwd" + "\n");
+		
+		//message
+		System.out.println(commandCbuffer.readLine());
+	}
+	
+	public void invalid() {
+		System.out.println("Invalid Arguments");
+		System.out.println("Try `help' for more information.");
 	}
 
 	@Override
 	public void run() {
-		Scanner scanner = new Scanner(System.in);
-		String command;
-		finishThread:
-		while(true){
-			try{
-				command = scanner.nextLine().trim();
-				
+		try {
+			Scanner scanner = new Scanner(System.in);
+			String command;
+			do {
+				System.out.print("myftp>");
+				command = scanner.nextLine();
+				command = command.trim();
+
 				input = new ArrayList<String>();
 				Scanner enteredInput = new Scanner(command);
-				
-				if(enteredInput.hasNext()){
+
+				if (enteredInput.hasNext()) {
 					input.add(enteredInput.next());
 				}
-				
+
 				if (enteredInput.hasNext())
 					input.add(commandCbuffer.readLine().substring(input.get(0).length()).trim());
 				enteredInput.close();
-				
+
+				if (input.isEmpty())
+					continue;
+
 				switch (input.get(0)) {
 				case "test":
 					System.out.println("printing test in client");
 					break;
 				case "quit":
-					break finishThread;
-
-				default:
 					break;
+				case "pwd":
+					pwd();
+					break;
+				default:
+					System.out.println("unrecognized command");
 				}
-			}catch (Exception e) {
-				e.printStackTrace();
-			}
+			} while (!command.equalsIgnoreCase("quit"));
+			scanner.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
-
 }
