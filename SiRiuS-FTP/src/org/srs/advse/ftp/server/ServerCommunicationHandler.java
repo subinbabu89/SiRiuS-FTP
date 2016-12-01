@@ -64,6 +64,9 @@ public class ServerCommunicationHandler implements Runnable{
 		finishThread:
 		while(true){
 			try {
+				while (!commandCbuffer.ready())
+					Thread.sleep(10);
+				
 				input = new ArrayList<String>();
 				Scanner enteredInput = new Scanner(commandCbuffer.readLine());
 				
@@ -77,7 +80,7 @@ public class ServerCommunicationHandler implements Runnable{
 				
 				switch (input.get(0)) {
 				case "test":
-					System.out.println("printing test");
+					System.out.println("printing test in server");
 					break;
 				case "quit":
 					break finishThread;
@@ -86,6 +89,8 @@ public class ServerCommunicationHandler implements Runnable{
 					break;
 				}
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}

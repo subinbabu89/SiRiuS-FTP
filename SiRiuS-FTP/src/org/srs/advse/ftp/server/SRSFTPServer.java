@@ -31,4 +31,7 @@ public class SRSFTPServer {
 		terminateSet = new HashSet<Integer>();
 	}
 
+	public synchronized void terminate(int commandID) {
+		terminateSet.add(commandID);
+	}
 }
