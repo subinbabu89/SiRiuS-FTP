@@ -10,12 +10,10 @@ import java.net.ServerSocket;
  * @author Subin
  *
  */
-public class ServerDaemon implements Runnable{
-	
+public class ServerDaemon implements Runnable {
+
 	private SRSFTPServer ftpServer;
 	private ServerSocket socket;
-	
-	
 
 	/**
 	 * @param ftpServer
@@ -27,12 +25,15 @@ public class ServerDaemon implements Runnable{
 		this.socket = socket;
 	}
 
-
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 
-		while(true){
+		while (true) {
 			try {
 				new Thread(new ServerCommunicationHandler(ftpServer, socket.accept())).start();
 			} catch (IOException e) {

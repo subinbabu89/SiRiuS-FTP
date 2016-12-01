@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package org.srs.advse.ftp.client;
 
 import java.io.BufferedReader;
@@ -15,6 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * @author Subin
+ *
+ */
 public class ClientCommunicationHandler implements Runnable {
 
 	private InputStreamReader commandChannelReader;
@@ -65,6 +72,9 @@ public class ClientCommunicationHandler implements Runnable {
 		System.out.println("Connected to: " + hostAddress);
 	}
 	
+	/**
+	 * @throws Exception
+	 */
 	public void pwd() throws Exception {
 		//only one argument
 		if (input.size() != 1) {
@@ -79,11 +89,17 @@ public class ClientCommunicationHandler implements Runnable {
 		System.out.println(commandCbuffer.readLine());
 	}
 	
+	/**
+	 * 
+	 */
 	public void invalid() {
 		System.out.println("Invalid Arguments");
 		System.out.println("Try `help' for more information.");
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		try {

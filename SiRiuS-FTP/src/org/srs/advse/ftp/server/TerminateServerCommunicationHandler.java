@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package org.srs.advse.ftp.server;
 
 import java.io.BufferedReader;
@@ -7,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * @author Subin
+ *
+ */
 public class TerminateServerCommunicationHandler implements Runnable {
 	private SRSFTPServer server;
 	private Socket socket;
@@ -21,6 +28,11 @@ public class TerminateServerCommunicationHandler implements Runnable {
 		this.socket = socket;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		try {

@@ -27,23 +27,41 @@ public class SRSFTPClient {
 		terminateSet = new HashSet<Integer>();
 		commandChannelMap = new HashMap<Integer, Path>();
 	}
-	
+
+	/**
+	 * @param path
+	 * @return
+	 */
 	public synchronized boolean transfer(Path path) {
 		return !dataChannelSet.contains(path);
 	}
-	
+
+	/**
+	 * @param path
+	 * @param commandID
+	 */
 	public synchronized void transferIN(Path path, int commandID) {
 		dataChannelSet.add(path);
 		commandChannelMap.put(commandID, path);
 	}
-	
+
+	/**
+	 * @param path
+	 * @param commandID
+	 */
 	public synchronized void transferOUT(Path path, int commandID) {
 		try {
 			dataChannelSet.remove(path);
 			commandChannelMap.remove(commandID);
-		} catch(Exception e) {}
+		} catch (Exception e) {
+		}
 	}
-	
+
+	/**
+	 * @param path
+	 * @param commandID
+	 * @return
+	 */
 	public synchronized boolean terminatePUT(Path path, int commandID) {
 		try {
 			if (terminateSet.contains(commandID)) {
@@ -52,11 +70,18 @@ public class SRSFTPClient {
 				terminateSet.remove(commandID);
 				return true;
 			}
-		} catch (Exception e) {}
-		
+		} catch (Exception e) {
+		}
+
 		return false;
 	}
 
+	/**
+	 * @param path
+	 * @param serverPath
+	 * @param commandID
+	 * @return
+	 */
 	public synchronized boolean terminateGET(Path path, Path serverPath, int commandID) {
 		try {
 			if (terminateSet.contains(commandID)) {
@@ -66,8 +91,9 @@ public class SRSFTPClient {
 				Files.deleteIfExists(path);
 				return true;
 			}
-		} catch (Exception e) {}
-		
+		} catch (Exception e) {
+		}
+
 		return false;
 	}
 }

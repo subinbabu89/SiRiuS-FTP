@@ -20,21 +20,19 @@ import java.util.Scanner;
  * @author Subin
  *
  */
-public class ServerCommunicationHandler implements Runnable{
-	
+public class ServerCommunicationHandler implements Runnable {
+
 	private SRSFTPServer server;
 	private Socket socket;
 	private Path path;
 	private List<String> input;
-	
+
 	private InputStreamReader commandChannelReader;
 	BufferedReader commandCbuffer;
-	
+
 	private DataInputStream dataChannelInputStream;
 	private DataOutputStream dataChannelOutputStream;
 	private OutputStream dataOutputStream;
-	
-	
 
 	/**
 	 * @param server
@@ -44,7 +42,7 @@ public class ServerCommunicationHandler implements Runnable{
 		this.server = server;
 		this.socket = socket;
 		path = Paths.get(System.getProperty("user.dir"));
-		
+
 		try {
 			commandChannelReader = new InputStreamReader(socket.getInputStream());
 			commandCbuffer = new BufferedReader(commandChannelReader);
@@ -55,41 +53,46 @@ public class ServerCommunicationHandler implements Runnable{
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * @throws Exception
+	 */
 	public void pwd() throws Exception {
-		//send path
+		// send path
 		dataChannelOutputStream.writeBytes(path + "\n");
 	}
 
-
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
-		System.out.println("Server communication thread started : "+Thread.currentThread().getName());
-		finishThread:
-		while(true){
+		System.out.println("Server communication thread started : " + Thread.currentThread().getName());
+		finishThread: while (true) {
 			try {
 				while (!commandCbuffer.ready())
 					Thread.sleep(10);
-				
+
 				input = new ArrayList<String>();
 				Scanner enteredInput = new Scanner(commandCbuffer.readLine());
-				
-				if(enteredInput.hasNext()){
+
+				if (enteredInput.hasNext()) {
 					input.add(enteredInput.next());
 				}
-				
+
 				if (enteredInput.hasNext())
 					input.add(commandCbuffer.readLine().substring(input.get(0).length()).trim());
 				enteredInput.close();
-				
-				System.out.println("relevant input is : "+input.get(0));
-				
+
+				System.out.println("relevant input is : " + input.get(0));
+
 				switch (input.get(0)) {
 				case "pwd":
 					pwd();
 					break;
-					
+
 				case "test":
 					System.out.println("printing test in server");
 					break;
@@ -103,7 +106,7 @@ public class ServerCommunicationHandler implements Runnable{
 				e.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}catch (Exception e) {
+			} catch (Exception e) {
 			}
 		}
 	}

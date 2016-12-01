@@ -1,7 +1,14 @@
+/**
+ * 
+ */
 package org.srs.advse.ftp.server;
 
 import java.net.ServerSocket;
 
+/**
+ * @author Subin
+ *
+ */
 public class TerminateDaemon implements Runnable {
 
 	private SRSFTPServer server;
@@ -16,6 +23,11 @@ public class TerminateDaemon implements Runnable {
 		this.serverSocket = serverSocket;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		while (true) {

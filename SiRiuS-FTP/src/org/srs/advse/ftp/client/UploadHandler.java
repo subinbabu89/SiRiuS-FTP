@@ -36,6 +36,14 @@ public class UploadHandler implements Runnable {
 	private OutputStream outputStream;
 	private DataOutputStream dataOutputStream;
 
+	/**
+	 * @param client
+	 * @param hostname
+	 * @param nPort
+	 * @param inputs
+	 * @param serverPath
+	 * @throws Exception
+	 */
 	public UploadHandler(SRSFTPClient client, String hostname, int nPort, List<String> inputs, Path serverPath)
 			throws Exception {
 		this.client = client;
@@ -55,6 +63,9 @@ public class UploadHandler implements Runnable {
 
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public void upload() throws Exception {
 		if (!client.transfer(serverPath.resolve(inputs.get(1)))) {
 			System.out.println("file already transfering");
