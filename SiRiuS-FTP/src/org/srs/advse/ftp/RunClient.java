@@ -1,10 +1,13 @@
 /**
  * 
  */
-package org.srs.advse.ftp.client;
+package org.srs.advse.ftp;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import org.srs.advse.ftp.client.ClientCommunicationHandler;
+import org.srs.advse.ftp.client.SRSFTPClient;
 
 /**
  * @author Subin
@@ -20,8 +23,8 @@ public class RunClient {
 	public static void main(String[] args) {
 
 		try {
-			InetAddress.getByName(hostname);
 			hostname = args[0];
+			InetAddress.getByName(hostname);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
