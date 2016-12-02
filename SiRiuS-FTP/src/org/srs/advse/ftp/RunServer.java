@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import org.srs.advse.ftp.server.SRSFTPServer;
-import org.srs.advse.ftp.server.ServerDaemon;
-import org.srs.advse.ftp.server.TerminateDaemon;
+import org.srs.advse.ftp.thread.ServerDaemon;
+import org.srs.advse.ftp.thread.TerminateDaemon;
 
 /**
  * @author Subin

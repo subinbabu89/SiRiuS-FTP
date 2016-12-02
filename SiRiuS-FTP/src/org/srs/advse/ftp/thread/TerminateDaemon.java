@@ -1,9 +1,12 @@
 /**
  * 
  */
-package org.srs.advse.ftp.server;
+package org.srs.advse.ftp.thread;
 
 import java.net.ServerSocket;
+
+import org.srs.advse.ftp.commhandler.TerminateServerCommunicationHandler;
+import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
  * @author Subin
