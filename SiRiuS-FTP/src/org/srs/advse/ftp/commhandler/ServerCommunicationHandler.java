@@ -51,10 +51,9 @@ public class ServerCommunicationHandler implements Runnable {
 		this.server = server;
 		this.socket = socket;
 		// path = Paths.get(System.getProperty("user.dir"));
-		// path = Paths.get(System.getProperty("user.home") + File.separator +
-		// "ftp" + File.separator + username);
-		path = Paths.get("/home/ubuntu" + File.separator + "ftp" + File.separator + username);
-		System.out.println("Path : " + path.toString());
+		String ftpPath = System.getProperty("user.home") + File.separator + "ftp";
+//		String ftpPath = "/home/ubuntu" + File.separator + "ftp";
+		path = Paths.get(ftpPath + File.separator + username);
 
 		if (Files.notExists(path)) {
 			Files.createDirectories(path);
