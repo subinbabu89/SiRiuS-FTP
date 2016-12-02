@@ -33,7 +33,11 @@ public class SRSFTPServer {
 		terminateSet = new HashSet<Integer>();
 	}
 
-	public synchronized int getIN(Path path) {
+	/**
+	 * @param path
+	 * @return
+	 */
+	public synchronized int downloadIN(Path path) {
 		int commandID = 0;
 
 		if (dataChannelMap.containsKey(path)) {
@@ -55,7 +59,11 @@ public class SRSFTPServer {
 		}
 	}
 
-	public synchronized void getOut(Path path, int commandID) {
+	/**
+	 * @param path
+	 * @param commandID
+	 */
+	public synchronized void downloadOUT(Path path, int commandID) {
 		try {
 			dataChannelMap.get(path).readLock().unlock();
 			commandChannelMap.remove(commandID);
@@ -68,7 +76,11 @@ public class SRSFTPServer {
 		}
 	}
 
-	public synchronized int putIN_ID(Path path) {
+	/**
+	 * @param path
+	 * @return
+	 */
+	public synchronized int uploadIN_ID(Path path) {
 		int commandID = 0;
 
 		while (commandChannelMap.containsKey(commandID = generateID()))
@@ -80,7 +92,12 @@ public class SRSFTPServer {
 		return commandID;
 	}
 
-	public synchronized boolean putIN(Path path, int commandID) {
+	/**
+	 * @param path
+	 * @param commandID
+	 * @return
+	 */
+	public synchronized boolean uploadIN(Path path, int commandID) {
 		if (writeQueue.peek() == commandID) {
 			if (dataChannelMap.containsKey(path)) {
 				if (dataChannelMap.get(path).writeLock().tryLock()) {
@@ -96,7 +113,11 @@ public class SRSFTPServer {
 		return false;
 	}
 
-	public synchronized void putOUT(Path path, int commandID) {
+	/**
+	 * @param path
+	 * @param commandID
+	 */
+	public synchronized void uploadOUT(Path path, int commandID) {
 
 		try {
 			dataChannelMap.get(path).writeLock().unlock();
@@ -111,6 +132,9 @@ public class SRSFTPServer {
 
 	}
 
+	/**
+	 * @return
+	 */
 	public int generateID() {
 		return new Random().nextInt(90000) + 10000;
 	}
@@ -122,7 +146,13 @@ public class SRSFTPServer {
 		terminateSet.add(commandID);
 	}
 
-	public synchronized boolean terminateGET(Path path, int commandID) throws Exception {
+	/**
+	 * @param path
+	 * @param commandID
+	 * @return
+	 * @throws Exception
+	 */
+	public synchronized boolean terminateDOWNLOAD(Path path, int commandID) throws Exception {
 		try {
 			if (terminateSet.contains(commandID)) {
 				terminateSet.remove(commandID);
@@ -141,7 +171,12 @@ public class SRSFTPServer {
 		return false;
 	}
 
-	public synchronized boolean terminatePUT(Path path, int commandID) {
+	/**
+	 * @param path
+	 * @param commandID
+	 * @return
+	 */
+	public synchronized boolean terminateUPLOAD(Path path, int commandID) {
 		try {
 			if (terminateSet.contains(commandID)) {
 				terminateSet.remove(commandID);

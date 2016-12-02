@@ -47,23 +47,24 @@ public class ServerCommunicationHandler implements Runnable {
 	 * @param server
 	 * @param socket
 	 */
-	public ServerCommunicationHandler(SRSFTPServer server, Socket socket, String username) throws Exception{
+	public ServerCommunicationHandler(SRSFTPServer server, Socket socket, String username) throws Exception {
 		this.server = server;
 		this.socket = socket;
-//		path = Paths.get(System.getProperty("user.dir"));
-//		path = Paths.get(System.getProperty("user.home") + File.separator + "ftp" + File.separator + username);
+		// path = Paths.get(System.getProperty("user.dir"));
+		// path = Paths.get(System.getProperty("user.home") + File.separator +
+		// "ftp" + File.separator + username);
 		path = Paths.get("/home/ubuntu" + File.separator + "ftp" + File.separator + username);
-		System.out.println("Path : "+path.toString());
-		
-		if(Files.notExists(path)){
+		System.out.println("Path : " + path.toString());
+
+		if (Files.notExists(path)) {
 			Files.createDirectories(path);
 		}
 
-			commandChannelReader = new InputStreamReader(socket.getInputStream());
-			commandCbuffer = new BufferedReader(commandChannelReader);
-			dataChannelInputStream = new DataInputStream(socket.getInputStream());
-			dataOutputStream = socket.getOutputStream();
-			dataChannelOutputStream = new DataOutputStream(dataOutputStream);
+		commandChannelReader = new InputStreamReader(socket.getInputStream());
+		commandCbuffer = new BufferedReader(commandChannelReader);
+		dataChannelInputStream = new DataInputStream(socket.getInputStream());
+		dataOutputStream = socket.getOutputStream();
+		dataChannelOutputStream = new DataOutputStream(dataOutputStream);
 	}
 
 	/**
@@ -74,28 +75,29 @@ public class ServerCommunicationHandler implements Runnable {
 		dataChannelOutputStream.writeBytes(path + "\n");
 	}
 
-	public void get() throws Exception {
-		System.out.println("input.get(1) : "+input.get(1));
-		System.out.println("path.resolve"+path.resolve(input.get(1)));
+	/**
+	 * @throws Exception
+	 */
+	public void download() throws Exception {
 		if (Files.notExists(path.resolve(input.get(1)))) {
 			System.out.println("file not exits");
 			dataChannelOutputStream
-					.writeBytes("get " + path.resolve(input.get(1)).getFileName() + " : No such thing" + "\n");
+					.writeBytes("down " + path.resolve(input.get(1)).getFileName() + " : No such thing" + "\n");
 			return;
 		}
 
 		if (Files.isDirectory(path.resolve(input.get(1)))) {
 			System.out.println("is directory");
 			dataChannelOutputStream
-					.writeBytes("get " + path.resolve(input.get(1)).getFileName() + " : is a directory" + "\n");
+					.writeBytes("down " + path.resolve(input.get(1)).getFileName() + " : is a directory" + "\n");
 			return;
 		}
 
-		int lockID = server.getIN(path.resolve(input.get(1)));
+		int lockID = server.downloadIN(path.resolve(input.get(1)));
 		if (lockID == -1) {
 			System.out.println("no lock id");
 			dataChannelOutputStream
-					.writeBytes("get " + path.resolve(input.get(1)).getFileName() + " : No such thing" + "\n");
+					.writeBytes("down " + path.resolve(input.get(1)).getFileName() + " : No such thing" + "\n");
 			return;
 		}
 
@@ -104,7 +106,7 @@ public class ServerCommunicationHandler implements Runnable {
 
 		Thread.sleep(100);
 
-		if (server.terminateGET(path.resolve(input.get(1)), lockID)) {
+		if (server.terminateDOWNLOAD(path.resolve(input.get(1)), lockID)) {
 			System.out.println("whatever this is");
 			quit();
 			return;
@@ -117,7 +119,7 @@ public class ServerCommunicationHandler implements Runnable {
 			byte[] fileSizeBytes = ByteBuffer.allocate(8).putLong(fileSize).array();
 			dataChannelOutputStream.write(fileSizeBytes, 0, 8);
 
-			if (server.terminateGET(path.resolve(input.get(1)), lockID)) {
+			if (server.terminateDOWNLOAD(path.resolve(input.get(1)), lockID)) {
 				System.out.println("whatever this is");
 				quit();
 				return;
@@ -126,7 +128,7 @@ public class ServerCommunicationHandler implements Runnable {
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
 			int count = 0;
 			while ((count = bufferedInputStream.read(fileBuffer)) > 0) {
-				if (server.terminateGET(path.resolve(input.get(1)), lockID)) {
+				if (server.terminateDOWNLOAD(path.resolve(input.get(1)), lockID)) {
 					System.out.println("whatever this is");
 					bufferedInputStream.close();
 					quit();
@@ -139,59 +141,63 @@ public class ServerCommunicationHandler implements Runnable {
 			e.printStackTrace();
 		}
 
-		server.getOut(path.resolve(input.get(1)), lockID);
+		server.downloadOUT(path.resolve(input.get(1)), lockID);
 
 	}
-	
-	public void put() throws Exception{
-		int lockID = server.putIN_ID(path.resolve(input.get(1)));
-		
-		dataChannelOutputStream.writeBytes(lockID+"\n");
-		
-		while(!server.putIN(path.resolve(input.get(1)), lockID)){
+
+	/**
+	 * @throws Exception
+	 */
+	public void upload() throws Exception {
+		int lockID = server.uploadIN_ID(path.resolve(input.get(1)));
+
+		dataChannelOutputStream.writeBytes(lockID + "\n");
+
+		while (!server.uploadIN(path.resolve(input.get(1)), lockID)) {
 			Thread.sleep(10);
 		}
-		
-		if(server.terminatePUT(path.resolve(input.get(1)), lockID)){
+
+		if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 			quit();
 			return;
 		}
-		
+
 		dataChannelOutputStream.writeBytes("\n");
-		
-		if(server.terminatePUT(path.resolve(input.get(1)), lockID)){
+
+		if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 			quit();
 			return;
 		}
-		
+
 		byte[] fileSizeBuffer = new byte[8];
 		dataChannelInputStream.read(fileSizeBuffer);
 		ByteArrayInputStream bis = new ByteArrayInputStream(fileSizeBuffer);
-		DataInputStream dis =new DataInputStream(bis);
+		DataInputStream dis = new DataInputStream(bis);
 		long fileSize = dis.readLong();
-		
-		if(server.terminatePUT(path.resolve(input.get(1)), lockID)){
+
+		if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 			quit();
 			return;
 		}
-		
-		FileOutputStream fileOutputStream = new FileOutputStream(new File(path+File.separator+input.get(1)).toString());
+
+		FileOutputStream fileOutputStream = new FileOutputStream(
+				new File(path + File.separator + input.get(1)).toString());
 		int count = 0;
 		byte[] filebuffer = new byte[1000];
 		long bytesReceived = 0;
-		while(bytesReceived<fileSize){
-			if(server.terminatePUT(path.resolve(input.get(1)), lockID)){
+		while (bytesReceived < fileSize) {
+			if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 				fileOutputStream.close();
 				quit();
 				return;
 			}
 			count = dataChannelInputStream.read(filebuffer);
-			fileOutputStream.write(filebuffer,0,count);
-			bytesReceived+=count;
+			fileOutputStream.write(filebuffer, 0, count);
+			bytesReceived += count;
 		}
 		fileOutputStream.close();
-		
-		server.putOUT(path.resolve(input.get(1)), lockID);
+
+		server.uploadOUT(path.resolve(input.get(1)), lockID);
 	}
 
 	/**
@@ -229,14 +235,14 @@ public class ServerCommunicationHandler implements Runnable {
 				enteredInput.close();
 
 				switch (input.get(0)) {
-				case "get":
-					get();
+				case "down":
+					download();
 					break;
 
-				case "put":
-					put();
+				case "up":
+					upload();
 					break;
-					
+
 				case "pwd":
 					pwd();
 					break;
@@ -244,7 +250,7 @@ public class ServerCommunicationHandler implements Runnable {
 				case "test":
 					System.out.println("printing test in server");
 					break;
-					
+
 				case "quit":
 					break finishThread;
 
