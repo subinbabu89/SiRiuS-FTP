@@ -16,6 +16,7 @@ import org.srs.advse.ftp.client.SRSFTPClient;
 public class RunClient {
 	public static int nPort, tPort;
 	public static String hostname;
+	public static String clientDir;
 
 	/**
 	 * @param args
@@ -31,10 +32,11 @@ public class RunClient {
 
 		nPort = Integer.parseInt(args[1]);
 		tPort = Integer.parseInt(args[2]);
+		clientDir = args[3];
 
 		try {
 			SRSFTPClient client = new SRSFTPClient();
-			(new Thread(new ClientCommunicationHandler(client, hostname, nPort))).start();
+			(new Thread(new ClientCommunicationHandler(client, hostname, nPort,clientDir))).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,10 +1,12 @@
 package org.srs.advse.ftp.server;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -31,10 +33,131 @@ public class SRSFTPServer {
 		terminateSet = new HashSet<Integer>();
 	}
 
+	public synchronized int getIN(Path path) {
+		int commandID = 0;
+
+		if (dataChannelMap.containsKey(path)) {
+			if (dataChannelMap.get(path).readLock().tryLock()) {
+				while (commandChannelMap.containsKey(commandID = generateID()))
+					commandChannelMap.put(commandID, path);
+				return commandID;
+			} else {
+				return -1;
+			}
+		} else {
+			dataChannelMap.put(path, new ReentrantReadWriteLock());
+			dataChannelMap.get(path).readLock().lock();
+
+			while (commandChannelMap.containsKey(commandID = generateID()))
+				;
+			commandChannelMap.put(commandID, path);
+			return commandID;
+		}
+	}
+
+	public synchronized void getOut(Path path, int commandID) {
+		try {
+			dataChannelMap.get(path).readLock().unlock();
+			commandChannelMap.remove(commandID);
+
+			if (dataChannelMap.get(path).getReadLockCount() == 0 && !dataChannelMap.get(path).isWriteLocked()) {
+				dataChannelMap.remove(path);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized int putIN_ID(Path path) {
+		int commandID = 0;
+
+		while (commandChannelMap.containsKey(commandID = generateID()))
+			;
+		commandChannelMap.put(commandID, path);
+
+		writeQueue.add(commandID);
+
+		return commandID;
+	}
+
+	public synchronized boolean putIN(Path path, int commandID) {
+		if (writeQueue.peek() == commandID) {
+			if (dataChannelMap.containsKey(path)) {
+				if (dataChannelMap.get(path).writeLock().tryLock()) {
+					return true;
+				} else
+					return false;
+			} else {
+				dataChannelMap.put(path, new ReentrantReadWriteLock());
+				dataChannelMap.get(path).writeLock().lock();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public synchronized void putOUT(Path path, int commandID) {
+
+		try {
+			dataChannelMap.get(path).writeLock().unlock();
+			commandChannelMap.remove(commandID);
+			writeQueue.poll();
+
+			if (dataChannelMap.get(path).getReadLockCount() == 0 && !dataChannelMap.get(path).isWriteLocked())
+				dataChannelMap.remove(path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public int generateID() {
+		return new Random().nextInt(90000) + 10000;
+	}
+
 	/**
 	 * @param commandID
 	 */
 	public synchronized void terminate(int commandID) {
 		terminateSet.add(commandID);
+	}
+
+	public synchronized boolean terminateGET(Path path, int commandID) throws Exception {
+		try {
+			if (terminateSet.contains(commandID)) {
+				terminateSet.remove(commandID);
+				commandChannelMap.remove(commandID);
+				dataChannelMap.get(path).readLock().unlock();
+
+				if (dataChannelMap.get(path).getReadLockCount() == 0 && !dataChannelMap.get(path).isWriteLocked()) {
+					dataChannelMap.remove(path);
+				}
+				return true;
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public synchronized boolean terminatePUT(Path path, int commandID) {
+		try {
+			if (terminateSet.contains(commandID)) {
+				terminateSet.remove(commandID);
+				commandChannelMap.remove(commandID);
+				dataChannelMap.get(path).writeLock().unlock();
+				writeQueue.poll();
+				Files.deleteIfExists(path);
+
+				if (dataChannelMap.get(path).getReadLockCount() == 0 && !dataChannelMap.get(path).isWriteLocked())
+					dataChannelMap.remove(path);
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 }

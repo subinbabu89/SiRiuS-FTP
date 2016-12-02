@@ -17,6 +17,7 @@ import org.srs.advse.ftp.server.TerminateDaemon;
 public class RunServer {
 
 	private static ServerSocket nSocket, tSocket;
+	private static String username;
 
 	/**
 	 * @param args
@@ -36,9 +37,11 @@ public class RunServer {
 			e1.printStackTrace();
 		}
 
+		username = args[2];
+		
 		try {
 			SRSFTPServer server = new SRSFTPServer();
-			(new Thread(new ServerDaemon(server, nSocket))).start();
+			(new Thread(new ServerDaemon(server, nSocket,username))).start();
 			(new Thread(new TerminateDaemon(server, tSocket))).start();
 		} catch (Exception e) {
 			e.printStackTrace();
