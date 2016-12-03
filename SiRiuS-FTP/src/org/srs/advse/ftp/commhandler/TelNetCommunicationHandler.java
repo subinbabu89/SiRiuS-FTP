@@ -19,8 +19,10 @@ public class TelNetCommunicationHandler implements Runnable {
 
 	private DataInputStream telnetDataInputStream;
 	private DataOutputStream telnetDataOutputStream;
-	
-	String ftpPath = System.getProperty("user.home") + File.separator + "ftp";
+
+	// String ftpPath = System.getProperty("user.home") + File.separator +
+	// "ftp";
+	String ftpPath = "/home/ubuntu" + File.separator + "ftp";
 
 	public TelNetCommunicationHandler(Socket telnetSocket) throws Exception {
 		telnetDataInputStream = new DataInputStream(telnetSocket.getInputStream());
@@ -29,7 +31,7 @@ public class TelNetCommunicationHandler implements Runnable {
 
 	@Override
 	public void run() {
-		boolean run =true;
+		boolean run = true;
 		while (run) {
 			try {
 				boolean success = false;
@@ -53,11 +55,11 @@ public class TelNetCommunicationHandler implements Runnable {
 					}
 				}
 				telnetDataOutputStream.writeUTF(String.valueOf(success));
-				if(success){
-					run =false;
+				if (success) {
+					run = false;
+					telnetDataInputStream.close();
 				}
 				bufferedReader.close();
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
