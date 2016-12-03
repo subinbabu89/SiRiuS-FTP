@@ -11,6 +11,8 @@ import java.io.FileReader;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
+import org.srs.advse.ftp.Constants;
+
 /**
  * @author Subin
  *
@@ -20,9 +22,7 @@ public class TelNetCommunicationHandler implements Runnable {
 	private DataInputStream telnetDataInputStream;
 	private DataOutputStream telnetDataOutputStream;
 
-	// String ftpPath = System.getProperty("user.home") + File.separator +
-	// "ftp";
-	String ftpPath = "/home/ubuntu" + File.separator + "ftp";
+	String ftpPath = Constants.getServerPath() + File.separator + "ftp";
 
 	public TelNetCommunicationHandler(Socket telnetSocket) throws Exception {
 		telnetDataInputStream = new DataInputStream(telnetSocket.getInputStream());

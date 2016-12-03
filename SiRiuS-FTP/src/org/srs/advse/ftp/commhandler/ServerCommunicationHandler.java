@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.srs.advse.ftp.Constants;
 import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
@@ -52,8 +53,7 @@ public class ServerCommunicationHandler implements Runnable {
 		this.server = server;
 		this.socket = socket;
 		// path = Paths.get(System.getProperty("user.dir"));
-//		String ftpPath = System.getProperty("user.home") + File.separator + "ftp";
-		 String ftpPath = "/home/ubuntu" + File.separator + "ftp";
+		 String ftpPath = Constants.getServerPath() + File.separator + "ftp";
 		path = Paths.get(ftpPath + File.separator + username);
 
 		if (Files.notExists(path)) {
