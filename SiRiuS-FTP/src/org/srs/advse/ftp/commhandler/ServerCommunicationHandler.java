@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +53,7 @@ public class ServerCommunicationHandler implements Runnable {
 		this.socket = socket;
 		// path = Paths.get(System.getProperty("user.dir"));
 		String ftpPath = System.getProperty("user.home") + File.separator + "ftp";
-//		String ftpPath = "/home/ubuntu" + File.separator + "ftp";
+		// String ftpPath = "/home/ubuntu" + File.separator + "ftp";
 		path = Paths.get(ftpPath + File.separator + username);
 
 		if (Files.notExists(path)) {
@@ -173,6 +174,8 @@ public class ServerCommunicationHandler implements Runnable {
 		ByteArrayInputStream bis = new ByteArrayInputStream(fileSizeBuffer);
 		DataInputStream dis = new DataInputStream(bis);
 		long fileSize = dis.readLong();
+		
+		System.out.println("filesize is "+fileSize);
 
 		if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 			quit();
@@ -181,6 +184,7 @@ public class ServerCommunicationHandler implements Runnable {
 
 		FileOutputStream fileOutputStream = new FileOutputStream(
 				new File(path + File.separator + input.get(1)).toString());
+		System.out.println("path is : "+path + File.separator + input.get(1));
 		int count = 0;
 		byte[] filebuffer = new byte[1000];
 		long bytesReceived = 0;
@@ -197,6 +201,18 @@ public class ServerCommunicationHandler implements Runnable {
 		fileOutputStream.close();
 
 		server.uploadOUT(path.resolve(input.get(1)), lockID);
+	}
+
+	public void list() throws Exception {
+		try {
+			DirectoryStream<Path> dirStream = Files.newDirectoryStream(path);
+			for (Path entry : dirStream)
+				dataChannelOutputStream.writeBytes(entry.getFileName() + "\n");
+			dataChannelOutputStream.writeBytes("\n");
+		} catch (Exception e) {
+			dataChannelOutputStream.writeBytes("list: failed" + "\n");
+			dataChannelOutputStream.writeBytes("\n");
+		}
 	}
 
 	/**
@@ -248,6 +264,10 @@ public class ServerCommunicationHandler implements Runnable {
 
 				case "test":
 					System.out.println("printing test in server");
+					break;
+
+				case "list":
+					list();
 					break;
 
 				case "quit":

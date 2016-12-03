@@ -6,7 +6,6 @@ package org.srs.advse.ftp;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import org.srs.advse.ftp.commhandler.TelNetCommunicationHandler;
 import org.srs.advse.ftp.server.SRSFTPServer;
 import org.srs.advse.ftp.thread.ServerDaemon;
 import org.srs.advse.ftp.thread.TelnetServerDaemon;
@@ -47,6 +46,7 @@ public class RunServer {
 			(new Thread(new ServerDaemon(server, nSocket,username))).start();
 			(new Thread(new TerminateDaemon(server, tSocket))).start();
 			(new Thread(new TelnetServerDaemon(telnetSocket))).start();
+//			(new Thread(new TelNetCommunicationHandler(telnetSocket.accept()))).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
