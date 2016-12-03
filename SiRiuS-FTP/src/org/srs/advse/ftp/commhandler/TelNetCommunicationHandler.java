@@ -9,6 +9,9 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
 import org.srs.advse.ftp.Constants;
@@ -57,7 +60,16 @@ public class TelNetCommunicationHandler implements Runnable {
 				telnetDataOutputStream.writeUTF(String.valueOf(success));
 				if (success) {
 					run = false;
+					
+					String ftpPath = Constants.getServerPath() + File.separator + "ftp";
+					Path path = Paths.get(ftpPath + File.separator + usertoken);
+
+					if (Files.notExists(path)) {
+						Files.createDirectories(path);
+					}
+					telnetDataOutputStream.writeUTF(path.toString());
 					telnetDataInputStream.close();
+					telnetDataOutputStream.close();
 				}
 				bufferedReader.close();
 			} catch (Exception e) {

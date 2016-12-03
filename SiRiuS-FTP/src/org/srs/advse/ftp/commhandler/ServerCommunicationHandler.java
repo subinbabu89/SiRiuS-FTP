@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.srs.advse.ftp.Constants;
 import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
@@ -49,22 +48,19 @@ public class ServerCommunicationHandler implements Runnable {
 	 * @param server
 	 * @param socket
 	 */
-	public ServerCommunicationHandler(SRSFTPServer server, Socket socket, String username) throws Exception {
+	public ServerCommunicationHandler(SRSFTPServer server, Socket socket) throws Exception {
 		this.server = server;
 		this.socket = socket;
 		// path = Paths.get(System.getProperty("user.dir"));
-		 String ftpPath = Constants.getServerPath() + File.separator + "ftp";
-		path = Paths.get(ftpPath + File.separator + username);
-
-		if (Files.notExists(path)) {
-			Files.createDirectories(path);
-		}
-
 		commandChannelReader = new InputStreamReader(socket.getInputStream());
 		commandCbuffer = new BufferedReader(commandChannelReader);
 		dataChannelInputStream = new DataInputStream(socket.getInputStream());
 		dataOutputStream = socket.getOutputStream();
 		dataChannelOutputStream = new DataOutputStream(dataOutputStream);
+	}
+
+	public void setPath(Path path) {
+		this.path = path;
 	}
 
 	/**
@@ -174,8 +170,8 @@ public class ServerCommunicationHandler implements Runnable {
 		ByteArrayInputStream bis = new ByteArrayInputStream(fileSizeBuffer);
 		DataInputStream dis = new DataInputStream(bis);
 		long fileSize = dis.readLong();
-		
-		System.out.println("filesize is "+fileSize);
+
+		System.out.println("filesize is " + fileSize);
 
 		if (server.terminateUPLOAD(path.resolve(input.get(1)), lockID)) {
 			quit();
@@ -184,7 +180,7 @@ public class ServerCommunicationHandler implements Runnable {
 
 		FileOutputStream fileOutputStream = new FileOutputStream(
 				new File(path + File.separator + input.get(1)).toString());
-		System.out.println("path is : "+path + File.separator + input.get(1));
+		System.out.println("path is : " + path + File.separator + input.get(1));
 		int count = 0;
 		byte[] filebuffer = new byte[1000];
 		long bytesReceived = 0;
@@ -250,6 +246,10 @@ public class ServerCommunicationHandler implements Runnable {
 				enteredInput.close();
 
 				switch (input.get(0)) {
+				case "setpath":
+					setPath();
+					break;
+					
 				case "down":
 					download();
 					break;
@@ -283,6 +283,10 @@ public class ServerCommunicationHandler implements Runnable {
 			} catch (Exception e) {
 			}
 		}
+	}
+
+	private void setPath() {
+		this.path = Paths.get(input.get(1));
 	}
 
 }
