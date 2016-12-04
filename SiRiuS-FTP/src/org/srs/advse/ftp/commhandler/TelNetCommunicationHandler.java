@@ -24,10 +24,13 @@ public class TelNetCommunicationHandler implements Runnable {
 
 	private DataInputStream telnetDataInputStream;
 	private DataOutputStream telnetDataOutputStream;
+	
+	private Socket telnetSocket;
 
 	String ftpPath = Constants.getServerPath() + File.separator + "ftp";
 
 	public TelNetCommunicationHandler(Socket telnetSocket) throws Exception {
+		this.telnetSocket = telnetSocket;
 		telnetDataInputStream = new DataInputStream(telnetSocket.getInputStream());
 		telnetDataOutputStream = new DataOutputStream(telnetSocket.getOutputStream());
 	}
@@ -68,8 +71,8 @@ public class TelNetCommunicationHandler implements Runnable {
 						Files.createDirectories(path);
 					}
 					telnetDataOutputStream.writeUTF(path.toString());
-					telnetDataInputStream.close();
-					telnetDataOutputStream.close();
+					telnetSocket.close();
+					bufferedReader.close();
 				}
 				bufferedReader.close();
 			} catch (Exception e) {

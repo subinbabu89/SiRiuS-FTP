@@ -34,11 +34,11 @@ public class ServerCommunicationHandler implements Runnable {
 
 	private SRSFTPServer server;
 	private Socket socket;
-	private Path path;
+	private static Path path;
 	private List<String> input;
 
 	private InputStreamReader commandChannelReader;
-	BufferedReader commandCbuffer;
+	private BufferedReader commandCbuffer;
 
 	private DataInputStream dataChannelInputStream;
 	private DataOutputStream dataChannelOutputStream;
@@ -57,10 +57,6 @@ public class ServerCommunicationHandler implements Runnable {
 		dataChannelInputStream = new DataInputStream(socket.getInputStream());
 		dataOutputStream = socket.getOutputStream();
 		dataChannelOutputStream = new DataOutputStream(dataOutputStream);
-	}
-
-	public void setPath(Path path) {
-		this.path = path;
 	}
 
 	/**
@@ -281,6 +277,7 @@ public class ServerCommunicationHandler implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -288,5 +285,4 @@ public class ServerCommunicationHandler implements Runnable {
 	private void setPath() {
 		this.path = Paths.get(input.get(1));
 	}
-
 }
