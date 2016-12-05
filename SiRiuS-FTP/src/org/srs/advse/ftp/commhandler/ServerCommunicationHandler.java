@@ -196,6 +196,9 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	public void list() throws Exception {
+		
+		while (!commandCbuffer.ready())
+			Thread.sleep(10);
 		try {
 			DirectoryStream<Path> dirStream = Files.newDirectoryStream(path);
 			for (Path entry : dirStream)
