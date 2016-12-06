@@ -13,7 +13,7 @@ public class Constants {
 		EC2, LOCAL
 	}
 
-	private static WORKING_MODE currentMode = WORKING_MODE.EC2;
+	private static WORKING_MODE currentMode = WORKING_MODE.LOCAL;
 
 	public static String getServerPath() {
 		if (currentMode == WORKING_MODE.EC2) {

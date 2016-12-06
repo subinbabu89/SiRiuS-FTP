@@ -197,8 +197,8 @@ public class ServerCommunicationHandler implements Runnable {
 
 	public void list() throws Exception {
 		
-		while (!commandCbuffer.ready())
-			Thread.sleep(10);
+//		while (!commandCbuffer.ready())
+//			Thread.sleep(10);
 		try {
 			DirectoryStream<Path> dirStream = Files.newDirectoryStream(path);
 			for (Path entry : dirStream)
@@ -244,6 +244,7 @@ public class ServerCommunicationHandler implements Runnable {
 					input.add(command.substring(input.get(0).length()).trim());
 				enteredInput.close();
 
+				System.out.println("relevant input : "+input.get(0));
 				switch (input.get(0)) {
 				case "setpath":
 					setPath();
