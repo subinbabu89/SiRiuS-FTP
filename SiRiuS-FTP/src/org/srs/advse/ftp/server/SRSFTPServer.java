@@ -195,4 +195,8 @@ public class SRSFTPServer {
 
 		return false;
 	}
+
+	public boolean delete(Path path) {
+		return !dataChannelMap.containsKey(path);
+	}
 }

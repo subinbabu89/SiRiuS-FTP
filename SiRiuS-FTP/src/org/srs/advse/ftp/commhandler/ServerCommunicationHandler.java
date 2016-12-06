@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -196,11 +197,12 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	public void list() throws Exception {
-		
-//		while (!commandCbuffer.ready())
-//			Thread.sleep(10);
+
+		// while (!commandCbuffer.ready())
+		// Thread.sleep(10);
 		try {
 			DirectoryStream<Path> dirStream = Files.newDirectoryStream(path);
+			System.out.println("serverPath : " + path);
 			for (Path entry : dirStream)
 				dataChannelOutputStream.writeBytes(entry.getFileName() + "\n");
 			dataChannelOutputStream.writeBytes("\n");
@@ -244,12 +246,12 @@ public class ServerCommunicationHandler implements Runnable {
 					input.add(command.substring(input.get(0).length()).trim());
 				enteredInput.close();
 
-				System.out.println("relevant input : "+input.get(0));
+				System.out.println("relevant input : " + input.get(0));
 				switch (input.get(0)) {
 				case "setpath":
 					setPath();
 					break;
-					
+
 				case "down":
 					download();
 					break;
@@ -272,6 +274,10 @@ public class ServerCommunicationHandler implements Runnable {
 
 				case "quit":
 					break finishThread;
+					
+				case "delete":
+					delete();
+					break;
 
 				default:
 					System.out.println("invalid command");
@@ -283,6 +289,30 @@ public class ServerCommunicationHandler implements Runnable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void delete() throws Exception {
+		if (!server.delete(path.resolve(input.get(1)))) {
+			dataChannelOutputStream.writeBytes("delete: cannot remove '" + input.get(1) + "': The file is locked" + "\n");
+			dataChannelOutputStream.writeBytes("\n");
+			return;
+		}
+
+		try {
+			boolean confirm = Files.deleteIfExists(path.resolve(input.get(1)));
+			if (!confirm) {
+				dataChannelOutputStream.writeBytes("delete: cannot remove '" + input.get(1) + "': No such file" + "\n");
+				dataChannelOutputStream.writeBytes("\n");
+			} else
+				dataChannelOutputStream.writeBytes("\n");
+		} catch (DirectoryNotEmptyException enee) {
+			dataChannelOutputStream.writeBytes("delete: failed to remove `" + input.get(1) + "': Directory not empty" + "\n");
+			dataChannelOutputStream.writeBytes("\n");
+		} catch (Exception e) {
+			dataChannelOutputStream.writeBytes("delete: failed to remove `" + input.get(1) + "'" + "\n");
+			dataChannelOutputStream
+			.writeBytes("\n");
 		}
 	}
 
