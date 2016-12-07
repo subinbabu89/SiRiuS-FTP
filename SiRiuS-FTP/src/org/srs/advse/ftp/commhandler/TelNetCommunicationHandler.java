@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp.commhandler;
 
 import java.io.BufferedReader;
@@ -17,6 +14,8 @@ import java.util.StringTokenizer;
 import org.srs.advse.ftp.Constants;
 
 /**
+ * Class used to handle the telnet communication for the application
+ * 
  * @author Subin
  *
  */
@@ -24,11 +23,17 @@ public class TelNetCommunicationHandler implements Runnable {
 
 	private DataInputStream telnetDataInputStream;
 	private DataOutputStream telnetDataOutputStream;
-	
+
 	private Socket telnetSocket;
 
 	String ftpPath = Constants.getServerPath() + File.separator + "ftp";
 
+	/**
+	 * Constructor to initialize the class with
+	 * 
+	 * @param telnetSocket
+	 * @throws Exception
+	 */
 	public TelNetCommunicationHandler(Socket telnetSocket) throws Exception {
 		this.telnetSocket = telnetSocket;
 		telnetDataInputStream = new DataInputStream(telnetSocket.getInputStream());
@@ -63,7 +68,7 @@ public class TelNetCommunicationHandler implements Runnable {
 				telnetDataOutputStream.writeUTF(String.valueOf(success));
 				if (success) {
 					run = false;
-					
+
 					String ftpPath = Constants.getServerPath() + File.separator + "ftp";
 					Path path = Paths.get(ftpPath + File.separator + usertoken);
 

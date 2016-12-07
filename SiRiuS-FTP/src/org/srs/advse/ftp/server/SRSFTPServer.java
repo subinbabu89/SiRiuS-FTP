@@ -34,6 +34,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * Method used to signify start of download operation
+	 * 
 	 * @param path
 	 * @return
 	 */
@@ -60,6 +62,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * Method used to signify completion of download operation
+	 * 
 	 * @param path
 	 * @param commandID
 	 */
@@ -77,6 +81,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * Method used to fetch id for the upload operation
+	 * 
 	 * @param path
 	 * @return
 	 */
@@ -86,13 +92,13 @@ public class SRSFTPServer {
 		while (commandChannelMap.containsKey(commandID = generateID()))
 			;
 		commandChannelMap.put(commandID, path);
-
 		writeQueue.add(commandID);
-
 		return commandID;
 	}
 
 	/**
+	 * Method used to signify start of upload operation
+	 * 
 	 * @param path
 	 * @param commandID
 	 * @return
@@ -114,6 +120,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * Method used to signify completion of upload operation
+	 * 
 	 * @param path
 	 * @param commandID
 	 */
@@ -133,6 +141,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * Method used to generate random ID
+	 * 
 	 * @return
 	 */
 	public int generateID() {
@@ -140,6 +150,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * method used to add for termination
+	 * 
 	 * @param commandID
 	 */
 	public synchronized void terminate(int commandID) {
@@ -147,6 +159,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * method used to check the terminate of download
+	 * 
 	 * @param path
 	 * @param commandID
 	 * @return
@@ -172,6 +186,8 @@ public class SRSFTPServer {
 	}
 
 	/**
+	 * method used to check for termination of upload
+	 * 
 	 * @param path
 	 * @param commandID
 	 * @return
@@ -196,6 +212,12 @@ public class SRSFTPServer {
 		return false;
 	}
 
+	/**
+	 * remove files from the files map
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public boolean delete(Path path) {
 		return !dataChannelMap.containsKey(path);
 	}

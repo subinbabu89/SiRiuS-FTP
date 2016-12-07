@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp.thread;
 
 import java.net.ServerSocket;
@@ -8,6 +5,8 @@ import java.net.ServerSocket;
 import org.srs.advse.ftp.commhandler.TelNetCommunicationHandler;
 
 /**
+ * Class to act as a daemon thread for the telnet comm handler
+ * 
  * @author Subin
  *
  */
@@ -16,6 +15,8 @@ public class TelnetServerDaemon implements Runnable {
 	private ServerSocket telnetSocket;
 
 	/**
+	 * Constructor to initialize the class with
+	 * 
 	 * @param telnetSocket
 	 */
 	public TelnetServerDaemon(ServerSocket telnetSocket) {

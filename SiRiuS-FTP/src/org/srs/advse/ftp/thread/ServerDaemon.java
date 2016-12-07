@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp.thread;
 
 import java.net.ServerSocket;
@@ -9,6 +6,8 @@ import org.srs.advse.ftp.commhandler.ServerCommunicationHandler;
 import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
+ * Class to act as a daemon thread for the server comm handler
+ * 
  * @author Subin
  *
  */
@@ -18,6 +17,8 @@ public class ServerDaemon implements Runnable {
 	private ServerSocket socket;
 
 	/**
+	 * Constructor to initialize the class with
+	 * 
 	 * @param ftpServer
 	 * @param socket
 	 */

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp.commhandler;
 
 import java.io.BufferedInputStream;
@@ -14,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.file.DirectoryNotEmptyException;
@@ -28,6 +26,8 @@ import java.util.Scanner;
 import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
+ * Communication handler for the server code
+ * 
  * @author Subin
  *
  */
@@ -44,8 +44,13 @@ public class ServerCommunicationHandler implements Runnable {
 	private DataInputStream dataChannelInputStream;
 	private DataOutputStream dataChannelOutputStream;
 	private OutputStream dataOutputStream;
+	private int data_port;
+	private String username;
+	private Socket requ_socket;
 
 	/**
+	 * constructor to initialize the comm handler
+	 * 
 	 * @param server
 	 * @param socket
 	 */
@@ -61,6 +66,8 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	/**
+	 * PWD command
+	 * 
 	 * @throws Exception
 	 */
 	public void pwd() throws Exception {
@@ -69,6 +76,8 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	/**
+	 * RETR command
+	 * 
 	 * @throws Exception
 	 */
 	public void download() throws Exception {
@@ -139,6 +148,8 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	/**
+	 * STOR command
+	 * 
 	 * @throws Exception
 	 */
 	public void upload() throws Exception {
@@ -196,10 +207,12 @@ public class ServerCommunicationHandler implements Runnable {
 		server.uploadOUT(path.resolve(input.get(1)), lockID);
 	}
 
+	/**
+	 * LIST command
+	 * 
+	 * @throws Exception
+	 */
 	public void list() throws Exception {
-
-		// while (!commandCbuffer.ready())
-		// Thread.sleep(10);
 		try {
 			DirectoryStream<Path> dirStream = Files.newDirectoryStream(path);
 			System.out.println("serverPath : " + path);
@@ -213,6 +226,8 @@ public class ServerCommunicationHandler implements Runnable {
 	}
 
 	/**
+	 * QUIT command
+	 * 
 	 * @throws IOException
 	 * @throws Exception
 	 */
@@ -274,9 +289,25 @@ public class ServerCommunicationHandler implements Runnable {
 
 				case "quit":
 					break finishThread;
-					
+
 				case "delete":
 					delete();
+					break;
+
+				case "mode":
+					mode();
+					break;
+
+				case "type":
+					type();
+					break;
+
+				case "pasv":
+					pasv();
+					break;
+
+				case "user":
+					user(command);
 					break;
 
 				default:
@@ -292,9 +323,87 @@ public class ServerCommunicationHandler implements Runnable {
 		}
 	}
 
+	/**
+	 * USER command
+	 * 
+	 * @param command
+	 */
+	private void user(String command) {
+		username = checkUser(command);
+		listFiles(username);
+	}
+
+	/**
+	 * Method used to check the user
+	 * 
+	 * @param command
+	 * @return
+	 */
+	private String checkUser(String command) {
+		return null;
+	}
+
+	/**
+	 * Method used to list the files for a username
+	 * 
+	 * @param username2
+	 */
+	private void listFiles(Object username2) {
+
+	}
+
+	/**
+	 * PASV command
+	 * 
+	 * @throws IOException
+	 */
+	private void pasv() throws IOException {
+		data_port = generateDataPort();
+		System.out.println("The data port is " + data_port);
+		dataChannelOutputStream.writeUTF(String.valueOf(data_port));
+		ServerSocket serverSocket = new ServerSocket(data_port);
+		System.out.println("Server listening on port " + data_port);
+		requ_socket = serverSocket.accept();
+	}
+
+	/**
+	 * TYPE command
+	 * 
+	 * @throws IOException
+	 */
+	private void type() throws IOException {
+		System.out.println("in TYPE");
+		dataChannelOutputStream.writeUTF("200 OK Message : Type is ASCII");
+	}
+
+	/**
+	 * MODE command
+	 * 
+	 * @throws IOException
+	 */
+	private void mode() throws IOException {
+		System.out.println("in mode");
+		dataChannelOutputStream.writeUTF("200 OK Message : Mode is Stream");
+	}
+
+	/**
+	 * Method used to generate random data port for the PASV command
+	 * 
+	 * @return
+	 */
+	private int generateDataPort() {
+		return 0;
+	}
+
+	/**
+	 * DELETE command
+	 * 
+	 * @throws Exception
+	 */
 	private void delete() throws Exception {
 		if (!server.delete(path.resolve(input.get(1)))) {
-			dataChannelOutputStream.writeBytes("delete: cannot remove '" + input.get(1) + "': The file is locked" + "\n");
+			dataChannelOutputStream
+					.writeBytes("delete: cannot remove '" + input.get(1) + "': The file is locked" + "\n");
 			dataChannelOutputStream.writeBytes("\n");
 			return;
 		}
@@ -307,15 +416,18 @@ public class ServerCommunicationHandler implements Runnable {
 			} else
 				dataChannelOutputStream.writeBytes("\n");
 		} catch (DirectoryNotEmptyException enee) {
-			dataChannelOutputStream.writeBytes("delete: failed to remove `" + input.get(1) + "': Directory not empty" + "\n");
+			dataChannelOutputStream
+					.writeBytes("delete: failed to remove `" + input.get(1) + "': Directory not empty" + "\n");
 			dataChannelOutputStream.writeBytes("\n");
 		} catch (Exception e) {
 			dataChannelOutputStream.writeBytes("delete: failed to remove `" + input.get(1) + "'" + "\n");
-			dataChannelOutputStream
-			.writeBytes("\n");
+			dataChannelOutputStream.writeBytes("\n");
 		}
 	}
 
+	/**
+	 * Method used to set the path in the server
+	 */
 	private void setPath() {
 		this.path = Paths.get(input.get(1));
 	}

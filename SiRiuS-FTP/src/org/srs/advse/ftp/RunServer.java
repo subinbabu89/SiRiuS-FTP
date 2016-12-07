@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp;
 
 import java.io.IOException;
@@ -12,14 +9,18 @@ import org.srs.advse.ftp.thread.TelnetServerDaemon;
 import org.srs.advse.ftp.thread.TerminateDaemon;
 
 /**
+ * Code file to run the server
+ * 
  * @author Subin
  *
  */
 public class RunServer {
 
-	private static ServerSocket nSocket, tSocket,telnetSocket;
+	private static ServerSocket nSocket, tSocket, telnetSocket;
 
 	/**
+	 * Main function to start the code
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -43,7 +44,6 @@ public class RunServer {
 			(new Thread(new ServerDaemon(server, nSocket))).start();
 			(new Thread(new TerminateDaemon(server, tSocket))).start();
 			(new Thread(new TelnetServerDaemon(telnetSocket))).start();
-//			(new Thread(new TelNetCommunicationHandler(telnetSocket.accept()))).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.srs.advse.ftp.commhandler;
 
 import java.io.BufferedReader;
@@ -13,6 +10,8 @@ import java.util.Scanner;
 import org.srs.advse.ftp.server.SRSFTPServer;
 
 /**
+ * Communication Handler to handle the terminate command
+ * 
  * @author Subin
  *
  */
@@ -21,6 +20,8 @@ public class TerminateServerCommunicationHandler implements Runnable {
 	private Socket socket;
 
 	/**
+	 * Constructor to initialize the class with
+	 * 
 	 * @param server
 	 * @param socket
 	 */
